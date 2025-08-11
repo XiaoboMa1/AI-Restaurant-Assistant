@@ -1,0 +1,13 @@
+{
+  "ma": {
+    "id": "1",
+    "username": "ma",
+    "profile": {
+      "FirstName": "ma",
+      "Surname": "ma",
+      "Email": "test1@email.com",
+      "Mobile": "00001000"
+    },
+    "created_at": "2025-08-07T21:12:01.174933"
+  }
+}

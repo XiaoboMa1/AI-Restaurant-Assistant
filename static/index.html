@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Booking AI Assistant</title>
+    <style>
+        {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .main-wrapper {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px;
+            min-height: 90vh;
+        }
+
+        .container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        .auth-container {
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+
+        .debug-sidebar {
+            width: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .debug-sidebar.hidden {
+            display: none;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 1.8em;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .auth-container {
+            padding: 30px;
+            flex: 1;
+        }
+
+        .chat-container {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .chat-container.active {
+            display: flex;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .user-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+        }
+
+        .user-btn:hover {
+            background: #5a6268;
+        }
+
+        .user-btn.danger {
+            background: #dc3545;
+        }
+
+        .user-btn.danger:hover {
+            background: #c82333;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: white;
+            transition: border-color 0.3s;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .profile-section {
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .marketing-section {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group {
+            margin-bottom: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .checkmark {
+            margin-left: 5px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-height: 0;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .message-content {
+            background: #f1f3f4;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .send-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 2px;
+        }
+
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.2s infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        /* Debug Panel Styles */
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+        }
+
+        .debug-header h3 {
+            margin: 0;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .debug-toggle {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .debug-content {
+            flex: 1;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            min-height: 0;
+        }
+
+        .debug-section {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .debug-section-header {
+            background: #e9ecef;
+            padding: 10px 15px;
+            font-weight: bold;
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .debug-section-content {
+            padding: 15px;
+        }
+
+        .debug-reasoning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .debug-decision {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .debug-tool-call {
+            background: #cce5ff;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .debug-api-call {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 10px;
+            margin: 8px 0;
+        }
+
+        .debug-step-indicator {
+            display: inline-block;
+            background: #6c757d;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-right: 8px;
+        }
+
+        .debug-timestamp {
+            color: #6c757d;
+            font-size: 10px;
+            float: right;
+        }
+
+        .debug-pre {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 8px;
+            margin: 5px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-size: 11px;
+        }
+
+        .debug-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+
+        .debug-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .debug-sidebar {
+                width: 100%;
+                order: -1;
+            }
+        }
+
+        .forgot-password-link {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .delete-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .delete-warning ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="header">
+                <h1>🍽️ Restaurant Booking AI Assistant</h1>
+                <p>TheHungryUnicorn Restaurant Reservation Management System</p>
+            </div>
+
+            <!-- Authentication Interface -->
+            <div id="auth-container" class="auth-container">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+                    <button class="auth-tab" onclick="switchTab('register')">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" class="auth-form active">
+                    <div class="form-group">
+                        <label for="login-username">Username</label>
+                        <input type="text" id="login-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn">Login</button>
+                    <div class="forgot-password-link">
+                        <a href="#" onclick="showForgotPasswordModal()" style="color: #667eea; text-decoration: none; font-size: 13px;">Forgot your password?</a>
+                    </div>
+                    <div id="login-error" class="error-message"></div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-username">Username</label>
+                        <input type="text" id="register-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    
+                    <!-- Profile Information Section -->
+                    <div class="profile-section">
+                        <h4 style="margin: 20px 0 10px 0; color: #333; font-size: 14px;">Profile Information (Optional)</h4>
+                        
+                        <div class="form-group">
+                            <label for="register-title">Title</label>
+                            <select id="register-title">
+                                <option value="">Select Title</option>
+                                <option value="Mr">Mr</option>
+                                <option value="Mrs">Mrs</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Dr">Dr</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-firstname">First Name</label>
+                            <input type="text" id="register-firstname" placeholder="Enter your first name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-surname">Surname</label>
+                            <input type="text" id="register-surname" placeholder="Enter your surname">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" placeholder="Enter your email address">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-mobile">Mobile Phone</label>
+                            <input type="tel" id="register-mobile" placeholder="Enter your mobile number">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="register-phone">Phone</label>
+                            <input type="tel" id="register-phone" placeholder="Enter your phone number">
+                        </div>
+                        
+                        <!-- Marketing Preferences -->
+                        <div class="marketing-section">
+                            <h5 style="margin: 15px 0 10px 0; color: #333; font-size: 13px;">Marketing Preferences</h5>
+                            
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="register-email-marketing">
+                                    <span class="checkmark"></span>
+                                    I agree to receive email marketing communications
+                                </label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="register-sms-marketing">
+                                    <span class="checkmark"></span>
+                                    I agree to receive SMS marketing communications
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn">Register</button>
+                    <div id="register-error" class="error-message"></div>
+                    <div id="register-success" class="success-message"></div>
+                </form>
+            </div>
+
+            <!-- Chat Interface -->
+            <div id="chat-container" class="chat-container">
+                <div class="user-info">
+                    <span id="current-user"></span>
+                    <div class="user-actions">
+                        <button class="user-btn" onclick="showChangePasswordModal()">Change Password</button>
+                        <button class="user-btn" onclick="showProfileModal()">Edit Profile</button>
+                        <button class="user-btn" onclick="showForgotPasswordModal()">Reset Password</button>
+                        <button class="user-btn danger" onclick="showDeleteAccountModal()">Delete Account</button>
+                        <button class="user-btn danger" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message assistant">
+                        <div class="message-content">
+                            Hello! I'm your restaurant booking assistant. I can help you with:<br>
+                            • Check available time slots<br>
+                            • Create new reservations<br>
+                            • View existing bookings<br>
+                            • Modify or cancel reservations<br><br>
+                            What can I help you with today?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="typing-indicator" id="typing-indicator">
+                    <span>AI is thinking</span>
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="send-btn" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Debug Panel -->
+        <div id="debug-sidebar" class="debug-sidebar">
+            <div class="debug-header">
+                <h3>🔍 Agent Debug Console</h3>
+                <button onclick="toggleDebugSidebar()" class="debug-toggle">Hide</button>
+            </div>
+            <div class="debug-content" id="debug-content">
+                <div style="text-align: center; color: #666; font-style: italic; padding: 20px;">
+                    Waiting for agent activity...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button class="modal-close" onclick="hideChangePasswordModal()">&times;</button>
+            </div>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label for="current-password">Current Password</label>
+                    <input type="password" id="current-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">New Password</label>
+                    <input type="password" id="new-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password</label>
+                    <input type="password" id="confirm-password" required>
+                </div>
+                <button type="submit" class="btn">Change Password</button>
+                <div id="change-password-error" class="error-message"></div>
+                <div id="change-password-success" class="success-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset Password</h3>
+                <button class="modal-close" onclick="hideForgotPasswordModal()">&times;</button>
+            </div>
+            <div id="forgot-step-1">
+                <form id="forgot-password-form">
+                    <div class="form-group">
+                        <label for="forgot-username">Username</label>
+                        <input type="text" id="forgot-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgot-email">Email Address</label>
+                        <input type="email" id="forgot-email" required>
+                    </div>
+                    <button type="submit" class="btn">Send Reset Code</button>
+                    <div id="forgot-password-error" class="error-message"></div>
+                </form>
+            </div>
+            <div id="forgot-step-2" style="display: none;">
+                <form id="reset-password-form">
+                    <div class="form-group">
+                        <label for="reset-code">Reset Code</label>
+                        <input type="text" id="reset-code" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reset-new-password">New Password</label>
+                        <input type="password" id="reset-new-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reset-confirm-password">Confirm New Password</label>
+                        <input type="password" id="reset-confirm-password" required>
+                    </div>
+                    <button type="submit" class="btn">Reset Password</button>
+                    <div id="reset-password-error" class="error-message"></div>
+                    <div id="reset-password-success" class="success-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Edit Profile</h3>
+                <button class="modal-close" onclick="hideProfileModal()">&times;</button>
+            </div>
+            <form id="profile-form">
+                <div class="form-group">
+                    <label for="profile-title">Title</label>
+                    <select id="profile-title">
+                        <option value="">Select Title</option>
+                        <option value="Mr">Mr</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="Ms">Ms</option>
+                        <option value="Dr">Dr</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="profile-firstname">First Name</label>
+                    <input type="text" id="profile-firstname">
+                </div>
+                <div class="form-group">
+                    <label for="profile-surname">Surname</label>
+                    <input type="text" id="profile-surname">
+                </div>
+                <div class="form-group">
+                    <label for="profile-email">Email</label>
+                    <input type="email" id="profile-email">
+                </div>
+                <div class="form-group">
+                    <label for="profile-mobile">Mobile Phone</label>
+                    <input type="tel" id="profile-mobile">
+                </div>
+                <div class="form-group">
+                    <label for="profile-phone">Phone</label>
+                    <input type="tel" id="profile-phone">
+                </div>
+                <div class="marketing-section">
+                    <h5 style="margin: 15px 0 10px 0; color: #333; font-size: 13px;">Marketing Preferences</h5>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="profile-email-marketing">
+                            <span class="checkmark"></span>
+                            I agree to receive email marketing communications
+                        </label>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="profile-sms-marketing">
+                            <span class="checkmark"></span>
+                            I agree to receive SMS marketing communications
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn">Update Profile</button>
+                <div id="profile-error" class="error-message"></div>
+                <div id="profile-success" class="success-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div id="delete-account-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Account</h3>
+                <button class="modal-close" onclick="hideDeleteAccountModal()">&times;</button>
+            </div>
+            <div class="delete-warning">
+                <p style="color: #dc3545; margin-bottom: 15px; font-weight: bold;">⚠️ Warning: This action cannot be undone!</p>
+                <p style="margin-bottom: 15px;">Deleting your account will permanently remove:</p>
+                <ul style="margin-bottom: 15px; color: #666;">
+                    <li>Your profile information</li>
+                    <li>All your booking history</li>
+                    <li>All chat sessions</li>
+                </ul>
+            </div>
+            <form id="delete-account-form">
+                <div class="form-group">
+                    <label for="delete-password">Enter your password to confirm</label>
+                    <input type="password" id="delete-password" required>
+                </div>
+                <button type="submit" class="btn" style="background: #dc3545;">Delete My Account</button>
+                <div id="delete-account-error" class="error-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        let currentUser = null;
+        let sessionId = null;
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.auth-tab:nth-child(${tab === 'login' ? '1' : '2'})`).classList.add('active');
+            
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            document.getElementById(`${tab}-form`).classList.add('active');
+            
+            clearMessages();
+        }
+
+        // Clear messages
+        function clearMessages() {
+            document.getElementById('login-error').textContent = '';
+            document.getElementById('register-error').textContent = '';
+            document.getElementById('register-success').textContent = '';
+        }
+
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            if (!username || !password) {
+                document.getElementById('login-error').textContent = 'Please fill in all fields';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = data.username;
+                    sessionId = data.session_id;
+                    showChatInterface();
+                    saveSession();
+                } else {
+                    document.getElementById('login-error').textContent = data.detail || 'Login failed';
+                }
+            } catch (error) {
+                document.getElementById('login-error').textContent = 'Network error occurred';
+                console.error('Login error:', error);
+            }
+        });
+
+        // Register form handler
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value;
+            
+            if (!username || !password) {
+                document.getElementById('register-error').textContent = 'Please fill in all required fields';
+                return;
+            }
+            
+            // Collect profile information
+            const profile = {};
+            
+            const title = document.getElementById('register-title').value;
+            if (title) profile.Title = title;
+            
+            const firstName = document.getElementById('register-firstname').value.trim();
+            if (firstName) profile.FirstName = firstName;
+            
+            const surname = document.getElementById('register-surname').value.trim();
+            if (surname) profile.Surname = surname;
+            
+            const email = document.getElementById('register-email').value.trim();
+            if (email) profile.Email = email;
+            
+            const mobile = document.getElementById('register-mobile').value.trim();
+            if (mobile) profile.Mobile = mobile;
+            
+            const phone = document.getElementById('register-phone').value.trim();
+            if (phone) profile.Phone = phone;
+            
+            // Marketing preferences
+            const emailMarketing = document.getElementById('register-email-marketing').checked;
+            const smsMarketing = document.getElementById('register-sms-marketing').checked;
+            
+            profile.ReceiveEmailMarketing = emailMarketing;
+            profile.ReceiveSmsMarketing = smsMarketing;
+            
+            try {
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username, 
+                        password,
+                        profile: Object.keys(profile).length > 0 ? profile : null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('register-success').textContent = 'Registration successful! You can now login.';
+                    document.getElementById('register-form').reset();
+                    setTimeout(() => switchTab('login'), 1500);
+                } else {
+                    document.getElementById('register-error').textContent = data.detail || 'Registration failed';
+                }
+            } catch (error) {
+                document.getElementById('register-error').textContent = 'Network error occurred';
+                console.error('Register error:', error);
+            }
+        });
+
+        // Change password form handler
+        document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            document.getElementById('change-password-error').textContent = '';
+            document.getElementById('change-password-success').textContent = '';
+            
+            if (newPassword !== confirmPassword) {
+                document.getElementById('change-password-error').textContent = 'New passwords do not match';
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                document.getElementById('change-password-error').textContent = 'Password must be at least 6 characters';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/change-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: currentUser,
+                        current_password: currentPassword,
+                        new_password: newPassword
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('change-password-success').textContent = 'Password changed successfully!';
+                    document.getElementById('change-password-form').reset();
+                    setTimeout(() => hideChangePasswordModal(), 1500);
+                } else {
+                    document.getElementById('change-password-error').textContent = data.detail || 'Failed to change password';
+                }
+            } catch (error) {
+                document.getElementById('change-password-error').textContent = 'Network error occurred';
+                console.error('Change password error:', error);
+            }
+        });
+
+        // Show chat interface
+        function showChatInterface() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('chat-container').classList.add('active');
+            document.getElementById('current-user').textContent = `Logged in as: ${currentUser}`;
+            document.getElementById('chat-input').focus();
+        }
+
+        // Show change password modal
+        function showChangePasswordModal() {
+            document.getElementById('change-password-modal').style.display = 'block';
+            document.getElementById('current-password').focus();
+        }
+
+        // Hide change password modal
+        function hideChangePasswordModal() {
+            document.getElementById('change-password-modal').style.display = 'none';
+            document.getElementById('change-password-form').reset();
+            document.getElementById('change-password-error').textContent = '';
+            document.getElementById('change-password-success').textContent = '';
+        }
+
+        // Show forgot password modal
+        function showForgotPasswordModal() {
+            document.getElementById('forgot-password-modal').style.display = 'block';
+            document.getElementById('forgot-step-1').style.display = 'block';
+            document.getElementById('forgot-step-2').style.display = 'none';
+            document.getElementById('forgot-username').focus();
+        }
+
+        // Hide forgot password modal
+        function hideForgotPasswordModal() {
+            document.getElementById('forgot-password-modal').style.display = 'none';
+            document.getElementById('forgot-password-form').reset();
+            document.getElementById('reset-password-form').reset();
+            clearForgotPasswordMessages();
+        }
+
+        // Show profile modal
+        function showProfileModal() {
+            document.getElementById('profile-modal').style.display = 'block';
+            loadCurrentProfile();
+        }
+
+        // Hide profile modal
+        function hideProfileModal() {
+            document.getElementById('profile-modal').style.display = 'none';
+            document.getElementById('profile-form').reset();
+            document.getElementById('profile-error').textContent = '';
+            document.getElementById('profile-success').textContent = '';
+        }
+
+        // Show delete account modal
+        function showDeleteAccountModal() {
+            document.getElementById('delete-account-modal').style.display = 'block';
+            document.getElementById('delete-password').focus();
+        }
+
+        // Hide delete account modal
+        function hideDeleteAccountModal() {
+            document.getElementById('delete-account-modal').style.display = 'none';
+            document.getElementById('delete-account-form').reset();
+            document.getElementById('delete-account-error').textContent = '';
+        }
+
+        // Clear forgot password messages
+        function clearForgotPasswordMessages() {
+            document.getElementById('forgot-password-error').textContent = '';
+            document.getElementById('reset-password-error').textContent = '';
+            document.getElementById('reset-password-success').textContent = '';
+        }
+
+        // Load current user profile
+        async function loadCurrentProfile() {
+            try {
+                const response = await fetch(`${API_BASE}/user/${currentUser}`);
+                if (response.ok) {
+                    const userData = await response.json();
+                    const profile = userData.profile || {};
+                    
+                    document.getElementById('profile-title').value = profile.Title || '';
+                    document.getElementById('profile-firstname').value = profile.FirstName || '';
+                    document.getElementById('profile-surname').value = profile.Surname || '';
+                    document.getElementById('profile-email').value = profile.Email || '';
+                    document.getElementById('profile-mobile').value = profile.Mobile || '';
+                    document.getElementById('profile-phone').value = profile.Phone || '';
+                    document.getElementById('profile-email-marketing').checked = profile.ReceiveEmailMarketing || false;
+                    document.getElementById('profile-sms-marketing').checked = profile.ReceiveSmsMarketing || false;
+                }
+            } catch (error) {
+                console.error('Failed to load profile:', error);
+            }
+        }
+
+        // Forgot password form handler
+        document.getElementById('forgot-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('forgot-username').value.trim();
+            const email = document.getElementById('forgot-email').value.trim();
+            
+            try {
+                const response = await fetch(`${API_BASE}/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('forgot-step-1').style.display = 'none';
+                    document.getElementById('forgot-step-2').style.display = 'block';
+                    document.getElementById('reset-code').value = data.reset_code; // Auto-fill for demo
+                    alert(`Reset code: ${data.reset_code}\n${data.note}`);
+                } else {
+                    document.getElementById('forgot-password-error').textContent = data.detail || 'Failed to send reset code';
+                }
+            } catch (error) {
+                document.getElementById('forgot-password-error').textContent = 'Network error occurred';
+            }
+        });
+
+        // Reset password form handler
+        document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('forgot-username').value.trim();
+            const resetCode = document.getElementById('reset-code').value.trim();
+            const newPassword = document.getElementById('reset-new-password').value;
+            const confirmPassword = document.getElementById('reset-confirm-password').value;
+            
+            if (newPassword !== confirmPassword) {
+                document.getElementById('reset-password-error').textContent = 'Passwords do not match';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        username, 
+                        reset_code: resetCode, 
+                        new_password: newPassword 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('reset-password-success').textContent = 'Password reset successfully!';
+                    setTimeout(() => {
+                        hideForgotPasswordModal();
+                        switchTab('login');
+                    }, 1500);
+                } else {
+                    document.getElementById('reset-password-error').textContent = data.detail || 'Failed to reset password';
+                }
+            } catch (error) {
+                document.getElementById('reset-password-error').textContent = 'Network error occurred';
+            }
+        });
+
+        // Profile form handler
+        document.getElementById('profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const profile = {
+                Title: document.getElementById('profile-title').value,
+                FirstName: document.getElementById('profile-firstname').value.trim(),
+                Surname: document.getElementById('profile-surname').value.trim(),
+                Email: document.getElementById('profile-email').value.trim(),
+                Mobile: document.getElementById('profile-mobile').value.trim(),
+                Phone: document.getElementById('profile-phone').value.trim(),
+                ReceiveEmailMarketing: document.getElementById('profile-email-marketing').checked,
+                ReceiveSmsMarketing: document.getElementById('profile-sms-marketing').checked
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/update-profile`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, profile })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('profile-success').textContent = 'Profile updated successfully!';
+                    setTimeout(() => hideProfileModal(), 1500);
+                } else {
+                    document.getElementById('profile-error').textContent = data.detail || 'Failed to update profile';
+                }
+            } catch (error) {
+                document.getElementById('profile-error').textContent = 'Network error occurred';
+            }
+        });
+
+        // Delete account form handler
+        document.getElementById('delete-account-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('delete-password').value;
+            
+            if (!confirm('Are you absolutely sure you want to delete your account? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/delete-account`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Account deleted successfully. You will now be logged out.');
+                    logout();
+                } else {
+                    document.getElementById('delete-account-error').textContent = data.detail || 'Failed to delete account';
+                }
+            } catch (error) {
+                document.getElementById('delete-account-error').textContent = 'Network error occurred';
+            }
+        });
+
+        // Logout
+        function logout() {
+            if (sessionId) {
+                fetch(`${API_BASE}/logout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId })
+                }).catch(console.error);
+            }
+            
+            currentUser = null;
+            sessionId = null;
+            document.getElementById('auth-container').style.display = 'block';
+            document.getElementById('chat-container').classList.remove('active');
+            
+            // Clear chat history
+            const messages = document.getElementById('chat-messages');
+            messages.innerHTML = `
+                <div class="message assistant">
+                    <div class="message-content">
+                        Hello! I'm your restaurant booking assistant. I can help you with:<br>
+                        • Check available time slots<br>
+                        • Create new reservations<br>
+                        • View existing bookings<br>
+                        • Modify or cancel reservations<br><br>
+                        What can I help you with today?
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('login-form').reset();
+            document.getElementById('register-form').reset();
+            clearMessages();
+            clearSession();
+        }
+
+        // Send message
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addMessage('user', message);
+            input.value = '';
+            
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        message: message
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage('assistant', data.response);
+                    
+                    if (data.debug_info) {
+                        showEnhancedDebugInfo(data.debug_info, message);
+                    }
+                } else {
+                    addMessage('assistant', `Error: ${data.detail || 'Request failed'}`);
+                }
+            } catch (error) {
+                addMessage('assistant', 'Sorry, a network connection error occurred. Please try again later.');
+                console.error('Chat error:', error);
+            } finally {
+                hideTypingIndicator();
+            }
+        }
+
+        // Add message to chat interface
+        function addMessage(sender, content) {
+            const messages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content.replace(/\n/g, '<br>');
+            
+            messageDiv.appendChild(contentDiv);
+            messages.appendChild(messageDiv);
+            
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'flex';
+            const messages = document.getElementById('chat-messages');
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+
+        // Page load initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('currentUser');
+            const savedSessionId = localStorage.getItem('sessionId');
+            
+            if (savedUser && savedSessionId) {
+                currentUser = savedUser;
+                sessionId = savedSessionId;
+                showChatInterface();
+            }
+        });
+
+        // Save session on successful login
+        function saveSession() {
+            if (currentUser && sessionId) {
+                localStorage.setItem('currentUser', currentUser);
+                localStorage.setItem('sessionId', sessionId);
+            }
+        }
+
+        // Clear session on logout
+        function clearSession() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('sessionId');
+        }
+
+        // Enhanced debug information display
+        function showEnhancedDebugInfo(debugInfo, userMessage) {
+            const debugSidebar = document.getElementById('debug-sidebar');
+            const debugContent = document.getElementById('debug-content');
+            
+            const timestamp = new Date().toLocaleTimeString();
+            let debugHtml = `
+                <div class="debug-section">
+                    <div class="debug-section-header">
+                        💬 User Input Analysis
+                        <span class="debug-timestamp">${timestamp}</span>
+                    </div>
+                    <div class="debug-section-content">
+                        <strong>User Message:</strong> "${userMessage}"<br>
+                        <strong>Session ID:</strong> ${sessionId}<br>
+                        <strong>User:</strong> ${currentUser}
+                    </div>
+                </div>
+            `;
+            
+            // Agent reasoning section
+            if (debugInfo.agent_reasoning) {
+                debugHtml += `
+                    <div class="debug-section">
+                        <div class="debug-section-header">🧠 Agent Reasoning Process</div>
+                        <div class="debug-section-content">
+                            ${debugInfo.agent_reasoning.map((reasoning, index) => `
+                                <div class="debug-reasoning">
+                                    <span class="debug-step-indicator">Step ${index + 1}</span>
+                                    ${reasoning}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Decision making section
+            if (debugInfo.decisions) {
+                debugHtml += `
+                    <div class="debug-section">
+                        <div class="debug-section-header">⚡ Decision Making</div>
+                        <div class="debug-section-content">
+                            ${debugInfo.decisions.map((decision, index) => `
+                                <div class="debug-decision">
+                                    <strong>Decision ${index + 1}:</strong> ${decision.decision}<br>
+                                    <strong>Reasoning:</strong> ${decision.reasoning}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Tool execution section
+            if (debugInfo.agent_steps && debugInfo.agent_steps.length > 0) {
+                debugHtml += `
+                    <div class="debug-section">
+                        <div class="debug-section-header">🔧 Tool Execution</div>
+                        <div class="debug-section-content">
+                            <p><strong>Total Steps Executed:</strong> ${debugInfo.agent_steps.length}</p>
+                            ${debugInfo.agent_steps.map((step, index) => `
+                                <div class="debug-tool-call">
+                                    <span class="debug-step-indicator">Tool ${step.step}</span>
+                                    <strong>${step.tool}</strong><br>
+                                    <strong>Input:</strong>
+                                    <div class="debug-pre">${JSON.stringify(step.input, null, 2)}</div>
+                                    ${step.output ? `<strong>Output:</strong><div class="debug-pre">${typeof step.output === 'string' ? step.output : JSON.stringify(step.output, null, 2)}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // API calls section
+            if (debugInfo.api_calls && debugInfo.api_calls.length > 0) {
+                debugHtml += `
+                    <div class="debug-section">
+                        <div class="debug-section-header">🌐 External API Calls</div>
+                        <div class="debug-section-content">
+                            ${debugInfo.api_calls.map((call, index) => `
+                                <div class="debug-api-call">
+                                    <strong>API Call ${index + 1}:</strong> ${call.tool}<br>
+                                    <strong>Parameters Sent:</strong>
+                                    <div class="debug-pre">${JSON.stringify(call.parameters_sent, null, 2)}</div>
+                                    <strong>API Response:</strong>
+                                    <div class="debug-pre">${typeof call.response === 'string' ? call.response : JSON.stringify(call.response, null, 2)}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Performance metrics
+            if (debugInfo.performance) {
+                debugHtml += `
+                    <div class="debug-section">
+                        <div class="debug-section-header">📊 Performance Metrics</div>
+                        <div class="debug-section-content">
+                            <strong>Total Processing Time:</strong> ${debugInfo.performance.total_time}ms<br>
+                            <strong>LLM Response Time:</strong> ${debugInfo.performance.llm_time}ms<br>
+                            <strong>Tool Execution Time:</strong> ${debugInfo.performance.tool_time}ms<br>
+                            <strong>Tokens Used:</strong> ${debugInfo.performance.tokens_used || 'N/A'}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Warnings and errors
+            if (debugInfo.warning) {
+                debugHtml += `<div class="debug-warning">⚠️ Warning: ${debugInfo.warning}</div>`;
+            }
+            
+            if (debugInfo.error) {
+                debugHtml += `<div class="debug-error">❌ Error: ${debugInfo.error}</div>`;
+            }
+            
+            debugContent.innerHTML = debugHtml;
+            debugSidebar.classList.remove('hidden');
+        }
+
+        // Toggle debug sidebar
+        function toggleDebugSidebar() {
+            const debugSidebar = document.getElementById('debug-sidebar');
+            const toggleBtn = debugSidebar.querySelector('.debug-toggle');
+            
+            if (debugSidebar.classList.contains('hidden')) {
+                debugSidebar.classList.remove('hidden');
+                toggleBtn.textContent = 'Hide';
+            } else {
+                debugSidebar.classList.add('hidden');
+                toggleBtn.textContent = 'Show Debug';
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const changePasswordModal = document.getElementById('change-password-modal');
+            const forgotPasswordModal = document.getElementById('forgot-password-modal');
+            const profileModal = document.getElementById('profile-modal');
+            const deleteAccountModal = document.getElementById('delete-account-modal');
+
+            if (event.target === changePasswordModal) {
+                hideChangePasswordModal();
+            }
+            if (event.target === forgotPasswordModal) {
+                hideForgotPasswordModal();
+            }
+            if (event.target === profileModal) {
+                hideProfileModal();
+            }
+            if (event.target === deleteAccountModal) {
+                hideDeleteAccountModal();
+            }
+        }
+    </script>
+</body>
+</html> 
