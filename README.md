@@ -12,6 +12,7 @@ The system is a conversational agent implemented using the LangChain framework. 
   **Advanced Query Handling**: The `smart_availability_search_tool` is implemented to handle complex user queries like "find the earliest available table for twenty people next week." It does this by iterating through multiple days in a single tool execution, overcoming a common limitation in simple agent loops.
   **Developer Observability**: The web UI (`static/index.html`) includes a debug panel that provides real-time insight into the agent's internal state, including the LLM's reasoning chain, tool call sequences with full parameters, and raw API responses.
 
+Demo Video: ![demo](https://youtu.be/VCz_hOIquwM)
 ## 2. Getting Started Instructions
 
 ### 2.1. Prerequisites
